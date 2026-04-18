@@ -33,12 +33,5 @@
         "diet": "Omnivore",
         "image": null,
         "description": null
-    },
-    {
-        "name": "Spinosaurus",
-        "period": "Cretaceous",
-        "diet": "Piscivore",
-        "image": "C:/Users/R4Fa/Downloads/pixel-art.png",
-        "description": "Seekor Dinosaurus yang memiliki duri/tulang belakang setinggi 2 meter. Ia merupakan predator yang menyeramkan, juga saat dalam peraiaran sungai"
     }
 ]
