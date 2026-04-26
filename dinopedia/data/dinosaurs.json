@@ -1,37 +1,30 @@
 [
     {
-        "name": "Triceratops",
+        "name": "velociraptor",
         "period": "Cretaceous",
-        "diet": "Hebivore",
-        "image": null,
-        "description": null
-    },
-    {
-        "name": "Oviraptor",
-        "period": "Cretaceous",
-        "diet": "Omnivore",
-        "image": null,
-        "description": null
-    },
-    {
-        "name": "Gallimimus",
-        "period": "Cretaceous",
-        "diet": "Omnivore",
-        "image": null,
-        "description": null
-    },
-    {
-        "name": "Pteranodon",
-        "period": "Jurassic",
-        "diet": "Omnivore",
-        "image": null,
-        "description": null
+        "diet": "Carnivore",
+        "image": "data/images/Velociraptor.jpg",
+        "description": ""
     },
     {
         "name": "Tyrannosaurus Rex",
         "period": "Cretaceous",
         "diet": "Carnivore",
-        "image": "",
+        "image": "data/images/Tyrannosaurus_Rex.jpg",
+        "description": ""
+    },
+    {
+        "name": "Spinosaurus",
+        "period": "Cretaceous",
+        "diet": "Piscivore",
+        "image": "data/images/Spinosaurus.jpg",
+        "description": ""
+    },
+    {
+        "name": "Gallimimus",
+        "period": "Cretaceous",
+        "diet": "Hebivore",
+        "image": "data/images/Gallimimus.jpg",
         "description": ""
     }
 ]

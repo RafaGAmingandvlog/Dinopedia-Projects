@@ -1,49 +1,59 @@
 # Image Service
-import requests
 import os
+import requests
 
 class ImageService:
+    CACHE_DIR = "data/images"
+
     @staticmethod
-    def fetch_dino_image(name):
+    def fetch_dino_image(name: str):
         try:
-            import urllib.parse
+            if not os.path.exists(ImageService.CACHE_DIR):
+                os.makedirs(ImageService.CACHE_DIR)
 
-            formatted = name.strip().replace(" ", "_")
-            encoded = urllib.parse.quote(formatted)
+            formatted = name.strip().title().replace(" ", "_")
+            filename = f"{ImageService.CACHE_DIR}/{formatted}.jpg"
 
-            # Wikipedia
-            url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}"
-            response = requests.get(url, timeout=5)
-
-            if response.status_code != 200:
-                return ""
-            
-            data = response.json()
-
-            if "thumbnail" not in data:
-                return ""
-            
-            # =====================
-            # 🔥 CACHE SYSTEM
-            # =====================
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            CACHE_DIR = os.path.join(BASE_DIR, "data", "images")
-            
-            if not os.path.exists(CACHE_DIR):
-                os.makedirs(CACHE_DIR)
-
-            filename = f"{CACHE_DIR}/{formatted}.jpg"
-
-            # kalau sudah ada → pakai cache
+            # 🔥 pakai cache kalau sudah ada
             if os.path.exists(filename):
                 return filename
 
-            # download image
+            url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{formatted}"
+
+            headers = {
+                "User-Agent": "DinopediaApp/1.0"
+            }
+
+            response = requests.get(url, headers=headers, timeout=5)
+
+            if response.status_code != 200:
+                print("Wiki error:", response.status_code)
+                return ""
+
+            data = response.json()
+
+            # 🔥 cek thumbnail ada atau tidak
+            if "thumbnail" not in data:
+                print("No thumbnail for:", name)
+                return ""
+
             img_url = data["thumbnail"]["source"]
-            img_data = requests.get(img_url).content
+
+            # 🔥 download image
+            img_response = requests.get(img_url, headers=headers, timeout=5)
+
+            # 🔥 VALIDASI PENTING
+            content_type = img_response.headers.get("Content-Type", "")
+            if "image" not in content_type:
+                print("Invalid image content:", content_type)
+                return ""
+
+            if img_response.status_code != 200:
+                print("Image download failed")
+                return ""
 
             with open(filename, "wb") as f:
-                f.write(img_data)
+                f.write(img_response.content)
 
             return filename
 

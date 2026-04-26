@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 )
 
 import requests
+import os
 from PySide6.QtCore import QPropertyAnimation, QThread, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
@@ -33,16 +34,20 @@ class DinoCard(QWidget):
         self.image_label.setFixedHeight(120)
         self.image_label.setAlignment(Qt.AlignCenter)
 
-        if dino.image:
-            pixmap = QPixmap(dino.image).scaled(
-                160, 120,
-                Qt.KeepAspectRatioByExpanding,
-                Qt.SmoothTransformation
-            )
-            self.image_label.setPixmap(pixmap)
+        if dino.image and isinstance(dino.image, str) and os.path.exists(dino.image):
+            pixmap = QPixmap(dino.image)
+
+            if not pixmap.isNull():
+                self.image_label.setPixmap(pixmap.scaled(
+                    160, 120,
+                    Qt.KeepAspectRatioByExpanding,
+                    Qt.SmoothTransformation
+                ))
+            else:
+                self.image_label.setText("Invalid Image File")
         else:
             self.image_label.setText("No Image")
-    
+
 
         # 📄 INFO
         self.name_label = QLabel(f"🦖 {dino.name}")
@@ -253,23 +258,27 @@ class DinopediaGUI(QWidget):
         if not name:
             QMessageBox.warning(self, "Error", "Nama wajib diisi")
             return
-        
+
         image_path = self.image_path
 
-        # Auto Fecth (if empty)
+        # 🔥 AUTO IMAGE kalau user tidak pilih manual
         if not image_path:
             image_path = ImageService.fetch_dino_image(name)
 
-        dino = Dinosaur(name, period, diet, self.image_path, description)
+        dino = Dinosaur(name, period, diet, image_path, description)
         self.db.add(dino)
 
+        print("FETCH RESULT:", image_path)
+
+        # reset form
         self.name_input.clear()
         self.period_input.clear()
         self.diet_input.clear()
+        self.desc_input.clear()
         self.image_path = ""
 
         self.load_data()
-
+        
     # ======================
     # IMAGE SELECT
     # ======================
