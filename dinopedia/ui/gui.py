@@ -10,6 +10,7 @@ import requests
 from PySide6.QtCore import QPropertyAnimation, QThread, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
+from utils.image_service import ImageService
 
 
 from models.dinosaur import Dinosaur
@@ -252,6 +253,12 @@ class DinopediaGUI(QWidget):
         if not name:
             QMessageBox.warning(self, "Error", "Nama wajib diisi")
             return
+        
+        image_path = self.image_path
+
+        # Auto Fecth (if empty)
+        if not image_path:
+            image_path = ImageService.fetch_dino_image(name)
 
         dino = Dinosaur(name, period, diet, self.image_path, description)
         self.db.add(dino)

@@ -1,12 +1,5 @@
 [
     {
-        "name": "T-Rex",
-        "period": "Cretaceous",
-        "diet": "Carnivore",
-        "image": null,
-        "description": null
-    },
-    {
         "name": "Triceratops",
         "period": "Cretaceous",
         "diet": "Hebivore",
@@ -33,5 +26,12 @@
         "diet": "Omnivore",
         "image": null,
         "description": null
+    },
+    {
+        "name": "Tyrannosaurus Rex",
+        "period": "Cretaceous",
+        "diet": "Carnivore",
+        "image": "",
+        "description": ""
     }
 ]
