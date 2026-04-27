@@ -1,12 +1,5 @@
 [
     {
-        "name": "velociraptor",
-        "period": "Cretaceous",
-        "diet": "Carnivore",
-        "image": "data/images/Velociraptor.jpg",
-        "description": ""
-    },
-    {
         "name": "Tyrannosaurus Rex",
         "period": "Cretaceous",
         "diet": "Carnivore",
@@ -14,17 +7,31 @@
         "description": ""
     },
     {
-        "name": "Spinosaurus",
+        "name": "Velociraptor",
         "period": "Cretaceous",
-        "diet": "Piscivore",
-        "image": "data/images/Spinosaurus.jpg",
+        "diet": "Carnivore",
+        "image": "data/images/Velociraptor.jpg",
         "description": ""
     },
     {
-        "name": "Gallimimus",
+        "name": "Triceratops",
         "period": "Cretaceous",
         "diet": "Hebivore",
-        "image": "data/images/Gallimimus.jpg",
+        "image": "data/images/Triceratops.jpg",
+        "description": ""
+    },
+    {
+        "name": "Stegosaurus",
+        "period": "Jurassic",
+        "diet": "Hebivore",
+        "image": "data/images/Stegosaurus.jpg",
+        "description": ""
+    },
+    {
+        "name": "Brachiosaurus",
+        "period": "Cretaceous",
+        "diet": "Hebivore",
+        "image": "data/images/Brachiosaurus.jpg",
         "description": ""
     }
 ]

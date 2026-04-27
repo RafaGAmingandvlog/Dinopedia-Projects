@@ -6,8 +6,9 @@ from PySide6.QtWidgets import (
     QFileDialog, QScrollArea, QGridLayout, QDialog, QGraphicsDropShadowEffect
 )
 
-import requests
 import os
+import random
+import requests
 from PySide6.QtCore import QPropertyAnimation, QThread, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
@@ -16,6 +17,112 @@ from utils.image_service import ImageService
 
 from models.dinosaur import Dinosaur
 
+# ======================
+# THREAD FETCH IMAGE
+# ======================
+class ImageFetcher(QThread):
+    finished = Signal(str)
+
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+
+    def run(self):
+        path = ImageService.fetch_dino_image(self.name)
+        self.finished.emit(path if path else "")
+
+# ======================
+# AI SCIENCE ENGINE
+# ======================
+class DinoScience:
+    @staticmethod
+    def classify(name):
+        n = name.lower()
+
+        if any(x in n for x in ["rex", "raptor", "allosaurus", "carnotaurus"]):
+            return "Theropoda (Carnivorous Bipedal Dinosaurs)"
+        elif any(x in n for x in ["brachio", "diplodocus", "apatosaurus"]):
+            return "Sauropoda (Long-neck Herbivores)"
+        elif any(x in n for x in ["triceratops", "stegosaurus", "ankylosaurus"]):
+            return "Ornithischia (Armored / Horned Dinosaurs)"
+        else:
+            return "Dinosauria (Uncertain Classification)"
+
+
+    @staticmethod
+    def estimate_size(name):
+        n = name.lower()
+
+        if "rex" in n:
+            return "≈ 12–13 m length", "≈ 8–9 tons"
+        elif "brachio" in n:
+            return "≈ 25 m length", "≈ 50–60 tons"
+        elif "velociraptor" in n:
+            return "≈ 2 m length", "≈ 15 kg"
+        else:
+            return "Unknown (insufficient fossil data)", "Unknown"
+
+
+    @staticmethod
+    def natural_description(dino, fossils):
+        base = f"{dino.name} lived during the {dino.period} period."
+
+        if fossils:
+            place = fossils[0].get("cc", "various regions")
+            extra = f" Fossils have been discovered in {place}."
+        else:
+            extra = " Fossil evidence is limited."
+
+        diet = ""
+        if dino.diet:
+            diet = f" It is generally considered a {dino.diet.lower()} species."
+
+        return base + extra + diet
+
+# ======================
+# PALEOBIOLOGY API
+# ======================
+class FossilAPI:
+
+    @staticmethod
+    def get_fossil_data(name):
+        try:
+            url = f"https://paleobiodb.org/data1.2/occs/list.json?base_name={name}&limit=10"
+            res = requests.get(url, timeout=5)
+
+            if res.status_code != 200:
+                return []
+
+            data = res.json()
+            return data.get("records", [])
+
+        except:
+            return []
+
+# ======================
+# MINI MAP
+# ======================
+class FossilMap(QWidget):
+    def __init__(self, fossils):
+        super().__init__()
+        self.fossils = fossils
+        self.setMinimumHeight(140)
+
+    def paintEvent(self, event):
+        from PySide6.QtGui import QPainter, QColor
+
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor("#101820"))
+
+        painter.setBrush(QColor("#00ffaa"))
+
+        for f in self.fossils:
+            try:
+                x = int(float(f.get("lng", 0)) * 2) % self.width()
+                y = int(float(f.get("lat", 0)) * 2) % self.height()
+                painter.drawEllipse(x, y, 4, 4)
+            except:
+                pass
 
 # ======================
 # CARD COMPONENT
@@ -30,23 +137,12 @@ class DinoCard(QWidget):
         layout = QVBoxLayout()
 
         # 🖼️ IMAGE
-        self.image_label = QLabel()
+        self.image_label = QLabel("Loading...")
+        self.image_label.setStyleSheet("color: gray;")
         self.image_label.setFixedHeight(120)
         self.image_label.setAlignment(Qt.AlignCenter)
 
-        if dino.image and isinstance(dino.image, str) and os.path.exists(dino.image):
-            pixmap = QPixmap(dino.image)
-
-            if not pixmap.isNull():
-                self.image_label.setPixmap(pixmap.scaled(
-                    160, 120,
-                    Qt.KeepAspectRatioByExpanding,
-                    Qt.SmoothTransformation
-                ))
-            else:
-                self.image_label.setText("Invalid Image File")
-        else:
-            self.image_label.setText("No Image")
+        self.load_image()
 
 
         # 📄 INFO
@@ -102,6 +198,52 @@ class DinoCard(QWidget):
         self.setCursor(Qt.PointingHandCursor)
 
         layout.setAlignment(Qt.AlignTop)
+    # ======================
+    # LOAD IMAGE (ASYNC)
+    # ======================
+    def load_image(self):
+        if self.dino.image and os.path.exists(self.dino.image):
+            self.set_image(self.dino.image)
+        else:
+            self.thread = ImageFetcher(self.dino.name)
+            self.thread.finished.connect(self.set_image)
+            self.thread.start()
+
+
+    # ======================
+    # SET IMAGE + AUTO CROP
+    # ======================
+    def set_image(self, path):
+        if not path or not os.path.exists(path):
+            self.image_label.setText("No Image")
+            return
+
+        pixmap = QPixmap(path)
+
+        if pixmap.isNull():
+            self.image_label.setText("Invalid Image")
+            return
+
+        # 🔥 AUTO CROP CENTER (biar rapi)
+        w, h = pixmap.width(), pixmap.height()
+        size = min(w, h)
+
+        cropped = pixmap.copy(
+            (w - size) // 2,
+            (h - size) // 2,
+            size,
+            size
+        )
+
+        self.image_label.setPixmap(cropped.scaled(
+            160, 120,
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation
+        ))
+
+        # simpan hasil ke object
+        self.dino.image = path
+
 
     def delete_dino(self):
         self.db.delete(self.dino.name)
@@ -267,9 +409,6 @@ class DinopediaGUI(QWidget):
 
         dino = Dinosaur(name, period, diet, image_path, description)
         self.db.add(dino)
-
-        print("FETCH RESULT:", image_path)
-
         # reset form
         self.name_input.clear()
         self.period_input.clear()
@@ -305,21 +444,27 @@ class DinopediaGUI(QWidget):
 # POP-UP Details
 # ========
 class DinoDetailDialog(QDialog):
-    def __init__(self, dino):
+     def __init__(self, dino):
         super().__init__()
 
-        self.setWindowTitle("🦖 Detail Dinosaur")
-        self.setFixedSize(400, 500)
+        self.setWindowTitle("🦖 Dinosaur Detail")
+        self.setFixedSize(450, 620)
 
         layout = QVBoxLayout()
 
-        # 🖼️ IMAGE BESAR
+        # 📡 DATA
+        fossils = FossilAPI.get_fossil_data(dino.name)
+        classification = DinoScience.classify(dino.name)
+        size, weight = DinoScience.estimate_size(dino.name)
+        description = DinoScience.natural_description(dino, fossils)
+
+        # 🖼️ IMAGE
         image_label = QLabel()
         image_label.setAlignment(Qt.AlignCenter)
 
         if dino.image:
             pixmap = QPixmap(dino.image).scaled(
-                300, 250,
+                320, 220,
                 Qt.KeepAspectRatio,
                 Qt.SmoothTransformation
             )
@@ -327,46 +472,48 @@ class DinoDetailDialog(QDialog):
         else:
             image_label.setText("No Image")
 
-        # 📄 INFO
-        name_label = QLabel(f"🦖 {dino.name}")
-        name_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        # 🧾 TITLE
+        name_label = QLabel(dino.name)
+        name_label.setStyleSheet("font-size:20px; font-weight:bold;")
 
-        period_label = QLabel(f"⏳ Periode: {dino.period}")
-        diet_label = QLabel(f"🍖 Diet: {dino.diet}")
+        class_label = QLabel(f"🧬 {classification}")
+        class_label.setStyleSheet("color: #00ffaa;")
 
-        # STYLE
-        period_label.setStyleSheet("color: gray;")
-        diet_label.setStyleSheet("color: gray;")
+        # 📊 SCIENTIFIC DATA
+        stats_label = QLabel(f"""
+📏 Estimated Size: {size}
+⚖ Estimated Weight: {weight}
+⏳ Period: {dino.period}
+🍖 Diet: {dino.diet}
+🦴 Fossil Records: {len(fossils)}
+""")
+        stats_label.setStyleSheet("font-family: monospace;")
+
+        # 🧠 DESCRIPTION
+        desc_label = QLabel(f"📖 {description}")
+        desc_label.setWordWrap(True)
+
+        # 🌍 MAP
+        map_widget = FossilMap(fossils)
 
         # ADD
         layout.addWidget(image_label)
         layout.addWidget(name_label)
-        layout.addWidget(period_label)
-        layout.addWidget(diet_label)
-
-        # Fade-in animation
-        self.setWindowOpacity(0)
-
-        self.anim = QPropertyAnimation(self, b"windowOpacity")
-        self.anim.setDuration(250)
-        self.anim.setStartValue(0)
-        self.anim.setEndValue(1)
-        self.anim.start()
+        layout.addWidget(class_label)
+        layout.addWidget(stats_label)
+        layout.addWidget(desc_label)
+        layout.addWidget(map_widget)
 
         self.setLayout(layout)
 
-        # 🎨 STYLE
+        # 🎨 CLEAN SCIENTIFIC STYLE
         self.setStyleSheet("""
             QDialog {
-                background-color: #2b2b2b;
+                background-color: #0f172a;
                 color: white;
+                border-radius: 12px;
             }
         """)
-
-        desc_label = QLabel(f"📖 {dino.description}")
-        desc_label.setWordWrap(True)
-
-        layout.addWidget(desc_label)
 
 class ImageViewer(QDialog):
     def __init__(self, image_path):
