@@ -1,25 +1,89 @@
-🦖 Dinopedia
+# 🦖 Dinopedia
 
-A modern desktop application to manage and explore dinosaur data with a clean Card UI, built using Python OOP + PySide6.
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![Status](https://img.shields.io/badge/Status-Active-success.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
+![PRs](https://img.shields.io/badge/PRs-Welcome-orange.svg)
 
-✨ Features:
-  🧠 OOP Architecture (Clean Code)
-  💾 Local JSON Database
-  🦖 Add / Edit / Delete Dinosaur
-  🔍 Real-time Search
-  🖼️ Image Upload & Preview
-  🧾 Description Support (Wikipedia-style)
-  🎴 Card UI Layout (Modern Look)
-  🌑 Dark Mode UI
-  🪟 Popup Detail View (with animation)
-  🔍 Click Image → Fullscreen Viewer
-  🎨 Hover Effect (Shadow Glow)
+Dinopedia adalah aplikasi desktop berbasis **PySide6 (Qt)** yang menampilkan koleksi dinosaurus dalam bentuk **interactive card UI** dengan data ilmiah nyata.
 
-📁 Project Structure
+Project ini menggabungkan:
+
+* 🎴 UI modern seperti kartu game
+* 📡 Data ilmiah nyata (Paleobiology Database & Wikidata)
+* 🧠 Deskripsi otomatis (AI / rule-based)
+* 🌍 Visualisasi habitat & fossil discovery
+
+---
+
+## ✨ Features
+
+### 🎴 Card-Based UI
+
+* Tampilan dinosaurus seperti kartu koleksi
+* Hover animation + shadow effect
+* Klik kartu → buka detail lengkap
+
+### 📡 Real Scientific Data
+
+* Integrasi dengan:
+
+  * Paleobiology Database (PBDB)
+  * Wikidata
+* Data mencakup:
+
+  * Periode hidup
+  * Diet
+  * Lokasi fossil ditemukan
+  * Jumlah record fossil
+
+### 🧬 Taxonomy Lengkap
+
+Menampilkan klasifikasi:
+
+* Kingdom → Species
+* Contoh:
+
+  * Animalia
+  * Chordata
+  * Reptilia
+  * Dinosauria
+  * Theropoda / Sauropoda / Ornithischia
+
+### 🌍 Habitat & Fossil Map
+
+* Data lokasi fossil real (latitude & longitude)
+* Siap dikembangkan ke visual map dunia
+
+### 🖼️ Auto Image System
+
+* Ambil gambar otomatis dari internet
+* Cache ke local storage
+* Auto crop & resize (card ratio)
+
+### ⚡ Async Loading
+
+* Image fetch tidak membuat UI freeze
+* Menggunakan QThread
+
+### 🧠 AI Description (Optional)
+
+* Generate deskripsi dinosaurus
+* Bisa:
+
+  * Rule-based (default)
+  * Offline AI (GGUF / ONNX) [opsional]
+
+---
+
+## 🏗️ Project Structure
+
+```
 dinopedia/
 │
-├── data/
-│   └── dinosaurs.json
+├── main.py
+├── dinopedia.json
 │
 ├── models/
 │   └── dinosaur.py
@@ -28,48 +92,115 @@ dinopedia/
 │   └── gui.py
 │
 ├── utils/
-│   └── database.py
+│   ├── database.py
+│   └── image_service.py
 │
-└── main.py
+└── data/
+    └── images/
+```
 
-🧠 How It Works
-  🔹 Database
-  Uses local JSON file (data/dinosaurs.json)
-  Auto-created if not exists
-  Managed via Database class
-  🔹 Model
-  Dinosaur class handles:
-  name
-  period
-  diet
-  image
-  description
-  🔹 UI
-  Built with PySide6
-  Uses:
-  QGridLayout → Card system
-  QScrollArea → Scrollable UI
-  QDialog → Detail popup
-  QGraphicsDropShadowEffect → Hover effect
+---
 
-🛠️ Future Improvements
-  🌐 Auto Image Fetch (API)
-  🧠 AI-generated description
-  📊 Sorting & Filtering
-  🧾 Export to PDF
-  🗂️ Category system (Carnivore, Herbivore, etc.)
-  🌍 Multi-language support
-  ☁️ Cloud database (Firebase / Supabase)
+## ⚙️ Installation
 
-👨‍💻 Author
+### 1. Clone repository
+
+```bash
+git clone https://github.com/RafaGAmingandvlog/Dinopedia-Projects.git
+cd Dinopedia-Projects
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## ▶️ Run Application
+
+```bash
+python main.py
+```
+
+---
+
+## 🧪 Example Dinosaurs
+
+* Tyrannosaurus Rex
+* Velociraptor
+* Triceratops
+* Spinosaurus
+* Brachiosaurus
+
+---
+
+## 🧠 AI (Optional Setup)
+
+Jika ingin menggunakan AI offline:
+
+### Install:
+
+```bash
+pip install ctransformers
+```
+
+### Model:
+
+* Gunakan model `.gguf` ringan (1B–3B)
+* Simpan di folder:
+
+```
+models/ai/
+```
+
+---
+
+## 📡 Data Sources
+
+* Paleobiology Database (PBDB)
+* Wikidata
+* Wikipedia (image fallback)
+
+---
+
+## 🚀 Roadmap
+
+* [ ] 🌍 Real world map visualization
+* [ ] 🧠 Full offline AI integration (GGUF)
+* [ ] 📊 Statistik ilmiah lebih detail
+* [ ] 🧬 Evolution & lineage tree
+* [ ] 🎮 Gamification system
+
+---
+
+## ⚠️ Notes
+
+* Python yang direkomendasikan:
+  👉 **3.10 / 3.11 (lebih stabil)**
+* Python 3.13 masih bleeding edge (beberapa library belum support)
+
+---
+
+## 👨‍💻 Author
+
 Rafa Ramadhan
-📌 Student Developer | Python Enthusiast
+GitHub: https://github.com/RafaGAmingandvlog
 
-📜 License
-This project is licensed under the MIT License.
+---
 
-⭐ Support
-If you like this project:
-  ⭐ Star this repo
-  🍴 Fork it
-  💡 Suggest new features
+## 📜 License
+
+MIT License
+
+---
+
+## ⭐ Support
+
+Jika kamu suka project ini:
+
+* ⭐ Star repo ini
+* 🍴 Fork dan kembangkan
+* 💡 Berikan ide fitur baru
+
